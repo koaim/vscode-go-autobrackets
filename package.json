@@ -1,0 +1,44 @@
+{
+  "name": "go-autobrackets",
+  "displayName": "Go Auto Brackets",
+  "description": "Automatically wrap and unwrap Go function result types when editing commas.",
+  "version": "0.1.2",
+  "publisher": "local",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:go"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -w -p .",
+    "test": "npm run compile && node --test test/*.test.cjs",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package --allow-missing-repository"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Go Auto Brackets",
+      "properties": {
+        "goAutobrackets.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Automatically add or remove parentheses around Go function result types."
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.9.0"
+  }
+}
