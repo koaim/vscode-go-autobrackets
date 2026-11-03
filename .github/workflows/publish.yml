@@ -2,7 +2,7 @@ name: Publish extension
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: marketplace
@@ -57,7 +57,7 @@ jobs:
           NODE
 
       - name: Package extension
-        run: npm run package -- --out extension.vsix --githubBranch master
+        run: npm run package -- --out extension.vsix --githubBranch main
 
       - uses: actions/upload-artifact@v4
         with:
