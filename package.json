@@ -4,6 +4,10 @@
   "description": "Automatically wrap and unwrap Go function result types when editing commas.",
   "version": "0.1.2",
   "publisher": "local",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koaim/vscode-go-autobrackets.git"
+  },
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -38,7 +42,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "1.85.0",
-    "@vscode/vsce": "^3.0.0",
+    "@vscode/vsce": "^4.1.0",
     "typescript": "^5.9.0"
   }
 }

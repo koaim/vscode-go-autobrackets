@@ -1,0 +1,69 @@
+name: Publish extension
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: marketplace-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: marketplace
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Set publisher and release version
+        env:
+          VSCE_PUBLISHER: ${{ vars.VSCE_PUBLISHER }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const manifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const publisher = process.env.VSCE_PUBLISHER?.trim();
+          if (!publisher || publisher === 'local') {
+            throw new Error('Set the VSCE_PUBLISHER GitHub Actions variable to your Marketplace Publisher ID.');
+          }
+          const [major, minor, patch] = manifest.version.split('.').map(Number);
+          const run = Number(process.env.GITHUB_RUN_NUMBER);
+          if (![major, minor, patch, run].every(Number.isSafeInteger) || run < 1) {
+            throw new Error('Expected a stable major.minor.patch version and a valid workflow run number.');
+          }
+          manifest.publisher = publisher;
+          manifest.version = `${major}.${minor}.${patch + run}`;
+          fs.writeFileSync('package.json', JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Publishing ${publisher}.${manifest.name}@${manifest.version}`);
+          NODE
+
+      - name: Package extension
+        run: npm run package -- --out extension.vsix --githubBranch master
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ github.run_number }}
+          path: extension.vsix
+          if-no-files-found: error
+
+      - name: Publish to VS Code Marketplace
+        run: npx --no-install vsce publish --oidc --packagePath extension.vsix --skip-duplicate
